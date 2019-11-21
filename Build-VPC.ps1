@@ -9,20 +9,12 @@ catch {
 }
 #endregion Setup
 
-#region VPC
-
+#region VPC/Subnet
 $vpc = New-EC2Vpc -CidrBlock '10.0.0.0/16'
-
-#endregion VPC
-
-#region Subnet
-
 $subnet = New-EC2Subnet -CidrBlock "10.0.0.0/24" -VpcId $vpc.VpcID
-
-#endregion Subnet
+#endregion VPC/Subnet
 
 #region Gateway/Routing
-
 $internetGateway = New-EC2InternetGateway
 $null = Add-EC2InternetGateway -InternetGatewayId $internetGateway.InternetGatewayId -VpcId $vpc.VpcId
 
@@ -34,12 +26,11 @@ $routeArgs = @{
     DestinationCidrBlock = "0.0.0.0/0"
 }
 $route = New-EC2Route @routeArgs
-
 #endregion Gateway/Routing
 
+### Don't need to run this, a NetworkACL is automatically created with desired settings
 #region NetworkACL
-
-$networkACL = New-EC2NetworkAcl -VpcId $vpc.VpcId
+<# $networkACL = New-EC2NetworkAcl -VpcId $vpc.VpcId
 
 $networkInboundAclEntryArgs = @{
     NetworkAclId = $networkACL.NetworkAclId
@@ -59,12 +50,10 @@ $networkOutboundAclEntryArgs = @{
     RuleNumber = 100
     Egress = $true
 }
-$networkOutboundAclEntry = New-EC2NetworkAclEntry @networkOutboundAclEntryArgs
-
+$networkOutboundAclEntry = New-EC2NetworkAclEntry @networkOutboundAclEntryArgs #>
 #endregion NetworkACL
 
 #region SecurityGroup
-
 $securityGroup = Get-EC2SecurityGroup | Where-Object {$_.GroupName -eq 'default'} | Select-Object -First 1
 
 $httpIpPermission = @{
@@ -81,6 +70,12 @@ $rdpIpPermission = @{
     IpRanges = '0.0.0.0/0'
 }
 
-$sgIngress = Grant-EC2SecurityGroupIngress -GroupId $securityGroup.GroupId -IpPermission @( $httpIpPermission, $rdpIpPermission )
+$icmpPermission = @{
+    IpProtocol = 'icmp'
+    FromPort = '0' # ICMP Type 0 - Echo Reply https://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml#icmp-parameters-types
+    ToPort = '0' # ICMP Code 0 - No Code
+    IpRanges = '0.0.0.0/0'
+}
 
+$sgIngress = Grant-EC2SecurityGroupIngress -GroupId $securityGroup.GroupId -IpPermission @( $httpIpPermission, $rdpIpPermission, $icmpPermission )
 #endregion SecurityGroup
