@@ -97,7 +97,7 @@ Configuration AWSPowerShellDemoConfig {
         }
         
         xWebsite 'AWSPowerShellDemoWebsite' {
-            Name             = 'AWSPowerShellDemo'
+            Name             = '{tagssm:WebsiteName}'
             Ensure           = 'Present'
             SiteId           = 1
             PhysicalPath     = 'C:\AWSPowerShellDemo'

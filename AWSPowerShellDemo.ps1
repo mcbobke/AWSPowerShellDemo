@@ -103,8 +103,9 @@ $trustRelationshipJson = @"
   }
 "@
 $iamRole = New-IAMRole -RoleName 'AWSPowerShellDemo' -AssumeRolePolicyDocument $trustRelationshipJson
-Register-IAMRolePolicy -RoleName 'AWSPowerShellDemo' -PolicyArn 'arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore'
-Register-IAMRolePolicy -RoleName 'AWSPowerShellDemo' -PolicyArn 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
+Register-IAMRolePolicy -RoleName 'AWSPowerShellDemo' -PolicyArn 'arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore' # Core SSM functionality
+Register-IAMRolePolicy -RoleName 'AWSPowerShellDemo' -PolicyArn 'arn:aws:iam::aws:policy/AmazonS3FullAccess' # S3 access for reading MOFs and writing output
+Register-IAMRolePolicy -RoleName 'AWSPowerShellDemo' -PolicyArn 'arn:aws:iam::aws:policy/AmazonEC2FullAccess' # Gather instance details
 
 # The instance profile must have the same name as the role
 $instanceProfile = New-IAMInstanceProfile -InstanceProfileName 'AWSPowerShellDemo'
@@ -164,6 +165,10 @@ $statusBucket = New-S3Bucket -BucketName 'dsc-status'
 $outputBucket = New-S3Bucket -BucketName 'dsc-output'
 #endregion S3Buckets
 
+#region ParamterStore
+Write-SSMParameter -Name 'WebsiteName' -Type SecureString -Value 'AWSPowerShellDemo'
+#endregion ParameterStore
+
 #region BuildMof
 $desiredOutputPath = '.\output'
 if (-not (Test-Path -Path $desiredOutputPath)) {
@@ -219,12 +224,14 @@ $ssmAssociation = New-SSMAssociation @dscAssociationArgs
 
 #region Cleanup
 Remove-SSMAssociation -AssociationId $ssmAssociation.AssociationId -Force
+Remove-SSMParameter -Name 'WebsiteName' -Force
 Get-S3Bucket | Remove-S3Bucket -Force -DeleteBucketContent
 Remove-EC2Instance -InstanceId $newInstance.InstanceId -Force
 Remove-IAMRoleFromInstanceProfile -InstanceProfileName 'AWSPowerShellDemo' -RoleName 'AWSPowerShellDemo' -Force
 Remove-IAMInstanceProfile -InstanceProfileName 'AWSPowerShellDemo' -Force
 Unregister-IAMRolePolicy -PolicyArn 'arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore' -RoleName 'AWSPowerShellDemo' -Force
 Unregister-IAMRolePolicy -PolicyArn 'arn:aws:iam::aws:policy/AmazonS3FullAccess' -RoleName 'AWSPowerShellDemo' -Force
+Unregister-IAMRolePolicy -PolicyArn 'arn:aws:iam::aws:policy/AmazonEC2FullAccess' -RoleName 'AWSPowerShellDemo' -Force
 Remove-IAMRole -RoleName 'AWSPowerShellDemo' -Force
 # TODO: Remove VPC components
 #endregion Cleanup
