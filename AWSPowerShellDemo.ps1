@@ -233,5 +233,5 @@ Unregister-IAMRolePolicy -PolicyArn 'arn:aws:iam::aws:policy/AmazonSSMManagedIns
 Unregister-IAMRolePolicy -PolicyArn 'arn:aws:iam::aws:policy/AmazonS3FullAccess' -RoleName 'AWSPowerShellDemo' -Force
 Unregister-IAMRolePolicy -PolicyArn 'arn:aws:iam::aws:policy/AmazonEC2FullAccess' -RoleName 'AWSPowerShellDemo' -Force
 Remove-IAMRole -RoleName 'AWSPowerShellDemo' -Force
-# TODO: Remove VPC components
+# TODO: Remove VPC components, Security Group
 #endregion Cleanup
