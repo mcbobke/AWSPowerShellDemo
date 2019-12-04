@@ -87,6 +87,7 @@ $sgIngress = Grant-EC2SecurityGroupIngress -GroupId $securityGroup.GroupId -IpPe
 #endregion SecurityGroup
 
 #region IAM
+# The following JSON defines a policy document that allows EC2 instances to assume this AWS role
 $trustRelationshipJson = @"
 {
     "Version": "2012-10-17",
