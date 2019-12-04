@@ -1,4 +1,6 @@
 #region Setup
+# Set-AWSCredential -StoreAs 'MattBobkeAWS1' -AccessKey 'ACCESSKEY' -SecretKey 'SECRETKEY'
+
 $AWSProfileName = "MattBobkeAWS1"
 try {
     Initialize-AWSDefaults -ProfileName $AWSProfileName -Region 'us-west-1' -ErrorAction 'Stop'
