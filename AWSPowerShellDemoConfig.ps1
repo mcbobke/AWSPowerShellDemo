@@ -8,6 +8,7 @@ Param(
 #region Configuration
 Configuration AWSPowerShellDemoConfig {
     #region Setup
+    # AWS-ApplyDSCMofs will install these modules on your target machines automatically when it parses the MOF
     Import-DscResource -ModuleName xWebAdministration, PSDesiredStateConfiguration, NetworkingDsc, ComputerManagementDsc
     #endregion Setup
 
@@ -97,7 +98,7 @@ Configuration AWSPowerShellDemoConfig {
         }
         
         xWebsite 'AWSPowerShellDemoWebsite' {
-            Name             = '{tagssm:WebsiteName}'
+            Name             = '{tagssm:WebsiteName}' # This is the token that will be replaced with the value of the encrypted string that we put in Parameter Store
             Ensure           = 'Present'
             SiteId           = 1
             PhysicalPath     = 'C:\AWSPowerShellDemo'
